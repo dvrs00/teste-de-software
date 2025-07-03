@@ -9,7 +9,7 @@ export class Pessoa {
     @Column({unique: true})
     cpf: string;
     @Column({unique: true})
-    emai: string;
+    email: string;
     @Column({name: 'data_nascimento', type: 'date'})
     dataNascimento: Date;
 }

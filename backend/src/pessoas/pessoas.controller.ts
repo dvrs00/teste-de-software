@@ -6,12 +6,13 @@ import { UpdatePessoaDto } from './dto/update-pessoa.dto';
 @Controller('pessoas')
 export class PessoasController {
   constructor(private readonly pessoasService: PessoasService) {}
-  /*
+  
   @Post()
   create(@Body() createPessoaDto: CreatePessoaDto) {
     return this.pessoasService.create(createPessoaDto);
   }
 
+  /*  
   @Get()
   findAll() {
     return this.pessoasService.findAll();

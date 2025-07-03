@@ -25,4 +25,23 @@ describe('PessoasController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  describe('create', () => {
+    it('deve chamar o pessoaService.create com o DTO correto', async () => {
+      // given
+      const createPessoaDto = {
+        nome: 'fulano',
+        cpf: '000.000.000-11',
+        email: 'fulano@gmailcom',
+        dataNascimento: new Date('2000-02-19')
+      };
+
+      // when 
+      await controller.create(createPessoaDto);
+
+      //then
+      expect(mockPessoaService.create).toHaveBeenCalledWith(createPessoaDto);
+      expect(mockPessoaService.create).toHaveBeenCalledTimes(1);
+    });
+  });
 });
