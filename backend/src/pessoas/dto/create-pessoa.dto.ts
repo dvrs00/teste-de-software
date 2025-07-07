@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, IsEmail, IsDate, Matches, Length } from "class-validator";
 import { IsCpf } from "../../validators/is-cpf.validator";
+import { Type } from "class-transformer";
 
 export class CreatePessoaDto {
     @IsString()
@@ -12,6 +13,7 @@ export class CreatePessoaDto {
     @IsEmail()
     @IsNotEmpty({message: 'O e-mail é obrigatório.'})
     email: string;
+    @Type(() => Date)
     @IsDate()
     @IsNotEmpty({message: 'A data de nascimento é obrigatória.'})
     dataNascimento: Date;
