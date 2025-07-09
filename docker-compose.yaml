@@ -37,13 +37,13 @@ services:
     image: postgres:14-alpine
     container_name: teste_de_software_db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db_teste_de_software
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db_teste_de_software
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/posgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
