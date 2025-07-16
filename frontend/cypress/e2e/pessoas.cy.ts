@@ -31,6 +31,22 @@ describe('CRUD de Pessoas', () => {
     cy.contains('td', novaPessoa.nome).should('not.exist');
   });
 
+  it('deve exibir erro ao tentar salvar com CPF inválido', () => {
+  cy.visit('/');
+  cy.contains('Nova Pessoa').click();
+
+  cy.get('input[name="nome"]').type('Fulano Inválido');
+  cy.get('input[name="cpf"]').type('111.111.111-11'); // CPF inválido
+  cy.get('input[name="email"]').type('fulano@teste.com');
+  cy.get('input[name="dataNascimento"]').type('1990-01-01');
+
+  cy.contains('Salvar').click();
+
+  cy.get('[data-testid="erros-validacao"]')
+    .should('be.visible')
+    .and('contain', 'O CPF informado é inválido.');
+});
+
   it('deve permitir editar uma pessoa existente', () => {
     
     const pessoaOriginal = {
