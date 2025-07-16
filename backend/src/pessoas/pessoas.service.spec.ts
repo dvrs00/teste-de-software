@@ -51,7 +51,7 @@ describe('PessoasService', () => {
       };
 
       const pessoa = {
-        id: 'um-uuid-gerado-pelo-banco',
+        id: 'uuid-valido',
         ... createPessoaDto,
       };
 
@@ -97,7 +97,7 @@ describe('PessoasService', () => {
         nome: 'fulano',
         cpf: '000.000.000-00',
         dataNascimento: new Date('2000-02-19'),
-        email: 'fulano@gmail.com',
+        email: 'fulano@gmail.com',  
       };
 
       const pessoaExistente = {

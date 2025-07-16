@@ -7,34 +7,27 @@ import { PessoasController } from '../src/pessoas/pessoas.controller';
 import { PessoasService } from '../src/pessoas/pessoas.service';
 import { IsCpfConstraint } from '../src/validators/is-cpf.validator';
 import { Repository } from 'typeorm';
-import { get } from 'http';
 
 describe('Pessoas E2E', () => {
   let app: INestApplication;
-  let pessoaRepository: Repository<Pessoa>; // Variável de acesso ao repositório
+  let pessoaRepository: Repository<Pessoa>; 
 
  beforeAll(async () => {
-    // Construindo um módulo de teste do zero
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        // 1. A única configuração de banco de dados que este teste conhecerá
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
           entities: [Pessoa],
           synchronize: true,
         }),
-        // 2. Módulo para injetar a entidade Pessoa no serviço
         TypeOrmModule.forFeature([Pessoa]),
       ],
-      // 3. Os controllers e providers que estamos testando
       controllers: [PessoasController],
-      providers: [PessoasService, IsCpfConstraint], // Adicione seu validador aqui
+      providers: [PessoasService, IsCpfConstraint], 
     }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    // Pega a instÂncia do repo para usar no beforeEach
     pessoaRepository = moduleFixture.get<Repository<Pessoa>>(getRepositoryToken(Pessoa));
 
     app.useGlobalPipes(new ValidationPipe({
@@ -55,9 +48,10 @@ describe('Pessoas E2E', () => {
 
   describe('POST /pessoas', () => {
     it('deve retornar 400 (Bad Request) para um CPF inválido', () => {
+      
       const pessoaComCpfInvalido = {
         nome: 'Pessoa Inválida',
-        cpf: '111.111.111-11', // CPF com todos os dígitos iguais é inválido
+        cpf: '111.111.111-11', 
         email: 'valido@email.com',
         dataNascimento: new Date('2000-01-02'),
       };
@@ -71,12 +65,10 @@ describe('Pessoas E2E', () => {
         });
     });
 
-    // Você pode adicionar mais testes aqui, como um para e-mail inválido, etc.
     it('deve retornar 201 (Created) para dados válidos', () => {
         const pessoaValida = {
           nome: 'Pessoa Válida',
-          // Use um CPF válido para este teste
-          cpf: '039.317.752-16', // Substitua por um CPF realmente válido
+          cpf: '03931775216', 
           email: 'pessoavalida@email.com',
           dataNascimento: new Date('2000-01-01'),
         };
@@ -94,6 +86,7 @@ describe('Pessoas E2E', () => {
 
   describe('GET /pessoas', () =>{
     it('deve retornar 200 (OK) e um array com todas pessoas cadastradas', async () => {
+
       //given 
       const primeiraPessoa = {
         nome: 'ciclano',

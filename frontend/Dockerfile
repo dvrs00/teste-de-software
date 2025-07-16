@@ -1,28 +1,19 @@
-# Diz ao Docker que vou utilizar uma imagem limpa do Node 18, versão alpine (mais leve)
-FROM node:18-alpine as builder
+# frontend/Dockerfile (para Desenvolvimento)
 
-# Diz ao Docker que a partir de agora, estaremos trabalhando no diretório definido
-WORKDIR /usr/src/app
+FROM node:18-alpine
 
-# Copio os arquivos package*.json do contexto de build para o diretório criado anteriormente na imagem (./)
-COPY package*.json ./ 
+# No frontend, o Vite geralmente usa a porta 5173 por padrão
+# Verifique no seu frontend/package.json qual porta o 'npm run dev' usa
+WORKDIR /app
 
-# Cria o node_modules e com todas dependências necessárias
-RUN npm install 
+COPY package*.json ./
 
-# Copia todos os arquivos do contexto de build para o WORKDIR atual 
+RUN npm install
+
 COPY . .
 
-# Executa o script de build da imagem, para criar os arquivos estáticos em /app/dist
-RUN npm run build 
+# Expõe a porta do servidor de desenvolvimento
+EXPOSE 5173
 
-# Aviso que usarei uma imagem limpa do nginx (ele ainda lembra o que foi feito no estágio anterior)
-FROM nginx:stable-alpine
-
-# Copio do estágio anterior a pasta /build e coloco ela em /usr/share/nginx/html no WORKDIR
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
-
-# Documento que a aplicação escutará na porta 80 do container.
-EXPOSE 80
-
-
+# Comando para iniciar o servidor de desenvolvimento
+CMD ["npm", "run", "dev"]

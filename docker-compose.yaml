@@ -6,14 +6,16 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=db_teste_de_software
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_teste_de_software
     volumes:
+      # Espelha o código local, mas ignora o node_modules local
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
+    # O comando abaixo agora corresponde ao objetivo do Dockerfile
     command: npm run start:dev
     depends_on:
       - db
@@ -25,21 +27,25 @@ services:
       context: ./frontend
     container_name: teste_de_software_frontend
     ports:
-      - "80:80"
+      # Mapeia a porta do servidor de desenvolvimento (geralmente 5173 para Vite)
+      - "5173:5173"
     volumes:
+      # Espelha o código local, mas ignora o node_modules local
       - ./frontend:/app
       - /app/node_modules
-    depends_on:
-      - backend
     networks:
       - app-network
+    # A dependência do DB não é mais necessária aqui
+    depends_on:
+      - backend
+
   db:
     image: postgres:14-alpine
     container_name: teste_de_software_db
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=db_teste_de_software
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_teste_de_software
     ports:
       - "5432:5432"
     volumes:

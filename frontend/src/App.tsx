@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
+import './App.css'; // Supondo que você tenha um arquivo de estilo
 
-// Define a "forma" de um objeto Pessoa no frontend
+// A interface Pessoa continua a mesma
 interface Pessoa {
   id: string;
   nome: string;
   cpf: string;
   email: string;
-  dataNascimento: string;
+  dataNascimento: Date;
 }
 
-// URL base da sua API backend
-const API_URL = 'http://localhost:3000'; // ATENÇÃO: Verifique se a porta é a mesma do seu backend
+// --- ATUALIZADO ---
+// Tipo para os dados do formulário, que não incluem o 'id'
+type PessoaFormData = Omit<Pessoa, 'id'>;
+
+const API_URL = 'http://localhost:3000';
 
 function App() {
-  // --- ESTADOS DO COMPONENTE ---
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
   const [view, setView] = useState<'list' | 'form'>('list');
+  // --- NOVO ESTADO ---
+  // Guarda a pessoa que está sendo editada. Se for null, estamos criando uma nova.
+  const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null);
 
   // --- FUNÇÕES DE API ---
   const fetchPessoas = async () => {
@@ -34,18 +40,38 @@ function App() {
     fetchPessoas();
   }, []);
 
-  const handleSavePessoa = async (novaPessoa: Omit<Pessoa, 'id'>) => {
+  // --- LÓGICA DE SALVAR ATUALIZADA ---
+  // Agora se chama 'handleSave' para ser mais genérico (cria e atualiza)
+  const handleSave = async (pessoaData: PessoaFormData) => {
     try {
-      await fetch(`${API_URL}/pessoas`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(novaPessoa),
-      });
+      // Se 'editingPessoa' tiver um valor, estamos atualizando (PATCH)
+      if (editingPessoa) {
+        await fetch(`${API_URL}/pessoas/${editingPessoa.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pessoaData),
+        });
+      } else {
+        // Se não, estamos criando (POST)
+        await fetch(`${API_URL}/pessoas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pessoaData),
+        });
+      }
+      // Limpa o estado de edição, atualiza a lista e volta para a tela de listagem
+      setEditingPessoa(null);
       fetchPessoas();
       setView('list');
     } catch (error) {
       console.error("Erro ao salvar pessoa:", error);
     }
+  };
+  
+  // --- NOVA FUNÇÃO PARA INICIAR A EDIÇÃO ---
+  const handleEdit = (pessoa: Pessoa) => {
+    setEditingPessoa(pessoa); // Guarda os dados da pessoa a ser editada
+    setView('form');        // Muda para a tela do formulário
   };
 
   const handleRemovePessoa = async (id: string) => {
@@ -61,7 +87,13 @@ function App() {
     }
   };
 
-  // --- RENDERIZAÇÃO DA UI ---
+  // --- NOVA FUNÇÃO PARA CANCELAR A EDIÇÃO/CRIAÇÃO ---
+  const handleCancel = () => {
+    setEditingPessoa(null); // Limpa qualquer estado de edição
+    setView('list');        // Volta para a lista
+  }
+
+  // --- RENDERIZAÇÃO DA UI ATUALIZADA ---
   return (
     <div className="container">
       <h1>CRUD de Pessoas com TDD</h1>
@@ -84,6 +116,10 @@ function App() {
                   <td>{pessoa.cpf}</td>
                   <td>{pessoa.email}</td>
                   <td>
+                    {/* 👇 ADICIONADO O BOTÃO DE EDITAR 👇 */}
+                    <button className="edit-btn" onClick={() => handleEdit(pessoa)}>
+                      Editar
+                    </button>
                     <button className="remove-btn" onClick={() => handleRemovePessoa(pessoa.id)}>
                       Remover
                     </button>
@@ -94,25 +130,42 @@ function App() {
           </table>
         </>
       ) : (
-        <PessoaForm onSave={handleSavePessoa} onCancel={() => setView('list')} />
+        // Passamos os dados da pessoa e a função de salvar atualizada para o formulário
+        <PessoaForm onSave={handleSave} onCancel={handleCancel} initialData={editingPessoa} />
       )}
     </div>
   );
 }
 
-// --- COMPONENTE DO FORMULÁRIO ---
+
+// --- COMPONENTE DO FORMULÁRIO ATUALIZADO ---
 interface PessoaFormProps {
-  onSave: (pessoa: Omit<Pessoa, 'id'>) => void;
+  onSave: (pessoa: PessoaFormData) => void;
   onCancel: () => void;
+  initialData: Pessoa | null; // Agora ele pode receber dados iniciais
 }
 
-function PessoaForm({ onSave, onCancel }: PessoaFormProps) {
+function PessoaForm({ onSave, onCancel, initialData }: PessoaFormProps) {
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
     email: '',
     dataNascimento: '',
   });
+
+  // --- NOVO useEffect ---
+  // Preenche o formulário com os dados de edição quando o componente é montado no modo de edição
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nome: initialData.nome,
+        cpf: initialData.cpf,
+        email: initialData.email,
+        // Formata o objeto Date para uma string 'YYYY-MM-DD' para o input
+        dataNascimento: new Date(initialData.dataNascimento).toISOString().split('T')[0],
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -121,12 +174,13 @@ function PessoaForm({ onSave, onCancel }: PessoaFormProps) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onSave({ ...formData }); 
+    onSave({ ...formData, dataNascimento: new Date(formData.dataNascimento) });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Nova Pessoa</h2>
+      {/* Altera o título dinamicamente */}
+      <h2>{initialData ? 'Editar Pessoa' : 'Nova Pessoa'}</h2>
       <div>
         <label>Nome:</label>
         <input type="text" name="nome" value={formData.nome} onChange={handleChange} required />
