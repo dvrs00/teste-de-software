@@ -72,7 +72,7 @@ form input {
 .form-buttons {
   margin-top: 1.5rem;
 }
-/* Adicione estas regras para estilizar e centralizar o formulário */
+
 form {
   max-width: 500px;         /* Define uma largura máxima para o formulário */
   margin: 2rem auto;        /* A mágica da centralização horizontal */
@@ -80,4 +80,13 @@ form {
   border: 1px solid #e0e0e0; /* Adiciona uma borda sutil */
   border-radius: 8px;       /* Arredonda os cantos */
   background-color: #fdfdfd;
+}
+
+.erro-box {
+  background-color: #ffe5e5;
+  color: #d00000;
+  padding: 10px;
+  border: 1px solid #d00000;
+  border-radius: 4px;
+  margin-bottom: 1rem;
 }
